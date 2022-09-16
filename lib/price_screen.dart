@@ -13,10 +13,10 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String SelectedCurrency = 'USD';
-  late Future<dynamic> futureCoindata;
+  late Future<CoinData> futureCoindata;
 
   @override
-  Future initState() async {
+  void initState() {
     // TODO: implement initState
     super.initState();
     futureCoindata = fetchCoinData();
@@ -79,8 +79,8 @@ class _PriceScreenState extends State<PriceScreen> {
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: FutureBuilder(
-                    future: exchangerate,
+                child: FutureBuilder<CoinData>(
+                    future: futureCoindata,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return Text(
@@ -91,7 +91,7 @@ class _PriceScreenState extends State<PriceScreen> {
                             color: Colors.white,
                           ),
                         );
-                      } else if (snapshot.hasError) {
+                      } else {
                         return Text('${snapshot.error}');
                       }
                     }),
