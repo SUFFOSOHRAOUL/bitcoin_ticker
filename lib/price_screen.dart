@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -11,17 +13,13 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String SelectedCurrency = 'USD';
-  CoinData coinData = CoinData();
-  var updateCoinData = CoinData().getExchangerate();
-  void updatedUI() {
-    setState() {}
-  }
+  late Future<dynamic> futureCoindata;
 
   @override
   Future initState() async {
     // TODO: implement initState
     super.initState();
-    updatedUI();
+    futureCoindata = fetchCoinData();
   }
 
   DropdownButton androidPicker() {
@@ -63,7 +61,6 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(updateCoinData);
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -82,14 +79,22 @@ class _PriceScreenState extends State<PriceScreen> {
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ? USD',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
+                child: FutureBuilder(
+                    future: exchangerate,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(
+                          '1 BTC = ${snapshot.data!.rate} USD',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.white,
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+                    }),
               ),
             ),
           ),
@@ -102,5 +107,34 @@ class _PriceScreenState extends State<PriceScreen> {
         ],
       ),
     );
+  }
+}
+
+Future<CoinData> fetchCoinData() async {
+  http.Response response = await http.get(
+    Uri.parse(
+        'https://rest.coinapi.io/v1/exchangerate/BTC/USD?apikey=346D3CF2-28C7-49F2-88B8-82E68EADF806'),
+  );
+  if (response.statusCode == 200) {
+    return CoinData.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('failed to load coin data');
+  }
+}
+
+class CoinData {
+  double rate;
+  String asset_id_base;
+  String asset_id_quote;
+  CoinData(
+      {required this.rate,
+      required this.asset_id_base,
+      required this.asset_id_quote});
+
+  factory CoinData.fromJson(Map<String, dynamic> json) {
+    return CoinData(
+        rate: json['rate'],
+        asset_id_base: json['asset_id_base'],
+        asset_id_quote: json['asset_id_quote']);
   }
 }
