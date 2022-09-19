@@ -12,16 +12,9 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String SelectedCurrency = 'USD';
   late Future<CoinData> futureCoindata;
-
+  String SelectedCurrency = 'USD';
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    futureCoindata = fetchCoinData();
-  }
-
   DropdownButton androidPicker() {
     List<DropdownMenuItem<String>> DropdownItems = [];
     for (int i = 0; i < currenciesList.length; i++) {
@@ -61,6 +54,7 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    futureCoindata = fetchCoinData(SelectedCurrency);
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -110,10 +104,10 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 }
 
-Future<CoinData> fetchCoinData() async {
+Future<CoinData> fetchCoinData(String SelectedCurrency) async {
   http.Response response = await http.get(
     Uri.parse(
-        'https://rest.coinapi.io/v1/exchangerate/BTC/USD?apikey=346D3CF2-28C7-49F2-88B8-82E68EADF806'),
+        'https://rest.coinapi.io/v1/exchangerate/BTC/${SelectedCurrency}?apikey=346D3CF2-28C7-49F2-88B8-82E68EADF806'),
   );
   if (response.statusCode == 200) {
     return CoinData.fromJson(jsonDecode(response.body));
