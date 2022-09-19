@@ -52,6 +52,49 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
+  Widget addCard() {
+    List<Widget> currency_Cards = [];
+    var exchangeCard;
+    for (int i = 0; i < cryptoList.length; i++) {
+      String crypto = cryptoList[i];
+
+      exchangeCard = Padding(
+        padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+        child: Card(
+          color: Colors.lightBlueAccent,
+          elevation: 5.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+            child: FutureBuilder<CoinData>(
+                future: futureCoindata,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      '1 ${crypto} = ${snapshot.data!.rate} ${SelectedCurrency}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    );
+                  } else {
+                    return Text('${snapshot.error}');
+                  }
+                }),
+          ),
+        ),
+      );
+      currency_Cards.add(exchangeCard);
+    }
+
+    return ListBody(
+      children: currency_Cards,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     futureCoindata = fetchCoinData(SelectedCurrency);
@@ -63,35 +106,7 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: FutureBuilder<CoinData>(
-                    future: futureCoindata,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Text(
-                          '1 BTC = ${snapshot.data!.rate} USD',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.white,
-                          ),
-                        );
-                      } else {
-                        return Text('${snapshot.error}');
-                      }
-                    }),
-              ),
-            ),
-          ),
+          addCard(),
           Container(
               height: 150.0,
               alignment: Alignment.center,
