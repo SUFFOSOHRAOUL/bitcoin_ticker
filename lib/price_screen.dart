@@ -1,10 +1,9 @@
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'fetchingcoindata.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -116,34 +115,5 @@ class _PriceScreenState extends State<PriceScreen> {
         ],
       ),
     );
-  }
-}
-
-Future<CoinData> fetchCoinData(String SelectedCurrency) async {
-  http.Response response = await http.get(
-    Uri.parse(
-        'https://rest.coinapi.io/v1/exchangerate/BTC/${SelectedCurrency}?apikey=346D3CF2-28C7-49F2-88B8-82E68EADF806'),
-  );
-  if (response.statusCode == 200) {
-    return CoinData.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('failed to load coin data');
-  }
-}
-
-class CoinData {
-  double rate;
-  String asset_id_base;
-  String asset_id_quote;
-  CoinData(
-      {required this.rate,
-      required this.asset_id_base,
-      required this.asset_id_quote});
-
-  factory CoinData.fromJson(Map<String, dynamic> json) {
-    return CoinData(
-        rate: json['rate'],
-        asset_id_base: json['asset_id_base'],
-        asset_id_quote: json['asset_id_quote']);
   }
 }
